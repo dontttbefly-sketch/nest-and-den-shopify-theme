@@ -476,6 +476,7 @@ function flyToCart(source) {
   const focusX = window.innerWidth / 2 - sourceRect.left - sourceRect.width / 2;
   const focusY = window.innerHeight / 2 - sourceRect.top - sourceRect.height / 2;
   const focusScale = Math.min(1.65, Math.max(1.08, 190 / Math.max(sourceRect.width, sourceRect.height, 1)));
+  const veil = showCartFocusVeil();
   flyer.style.setProperty("--fly-x", `${flyX}px`);
   flyer.style.setProperty("--fly-y", `${flyY}px`);
   flyer.style.setProperty("--focus-x", `${focusX}px`);
@@ -483,8 +484,28 @@ function flyToCart(source) {
   flyer.style.setProperty("--focus-scale", `${focusScale}`);
   document.body.append(flyer);
   bag.classList.add("is-catching");
+  window.setTimeout(() => releaseCartFocusVeil(veil), 780);
   window.setTimeout(() => flyer.remove(), 1180);
   window.setTimeout(() => bag.classList.remove("is-catching"), 1120);
+}
+
+function showCartFocusVeil() {
+  qsa(".cart-focus-veil").forEach((node) => node.remove());
+  const veil = document.createElement("div");
+  veil.className = "cart-focus-veil";
+  veil.setAttribute("aria-hidden", "true");
+  veil.style.setProperty("--veil-x", `${window.innerWidth / 2}px`);
+  veil.style.setProperty("--veil-y", `${window.innerHeight / 2}px`);
+  document.body.append(veil);
+  window.requestAnimationFrame(() => veil.classList.add("is-active"));
+  return veil;
+}
+
+function releaseCartFocusVeil(veil) {
+  if (!veil || !veil.isConnected) return;
+  veil.classList.add("is-leaving");
+  veil.classList.remove("is-active");
+  window.setTimeout(() => veil.remove(), 460);
 }
 
 // 商品渲染与筛选
