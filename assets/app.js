@@ -343,6 +343,7 @@ function initNavigation() {
   glider.setAttribute("aria-hidden", "true");
   nav.prepend(glider);
   moveNavGlider(qs("[aria-current='page']", nav) || qs("a", nav));
+  window.requestAnimationFrame(() => nav.classList.add("is-glider-ready"));
   window.addEventListener("resize", () => {
     moveNavGlider(qs(".is-transition-target", nav) || qs("[aria-current='page']", nav) || qs("a", nav));
   });
@@ -362,8 +363,12 @@ function moveNavGlider(link) {
 
   const navRect = nav.getBoundingClientRect();
   const linkRect = link.getBoundingClientRect();
-  nav.style.setProperty("--nav-glider-x", `${linkRect.left - navRect.left}px`);
-  nav.style.setProperty("--nav-glider-width", `${linkRect.width}px`);
+  const visualWidth = Math.max(38, linkRect.width - 14);
+  const x = linkRect.left - navRect.left + (linkRect.width - visualWidth) / 2;
+  const y = linkRect.top - navRect.top;
+  nav.style.setProperty("--nav-glider-x", `${x}px`);
+  nav.style.setProperty("--nav-glider-y", `${y}px`);
+  nav.style.setProperty("--nav-glider-width", `${visualWidth}px`);
   nav.style.setProperty("--nav-glider-height", `${linkRect.height}px`);
 }
 
@@ -398,7 +403,7 @@ function initRouteTransitions() {
     sessionStorage.setItem("pupkit-route-transition", "1");
     window.setTimeout(() => {
       window.location.href = targetUrl.href;
-    }, 430);
+    }, 300);
   });
 }
 

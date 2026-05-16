@@ -171,15 +171,21 @@ main {
 .nav-glider {
   position: absolute;
   z-index: 0;
-  top: 4px;
-  left: 4px;
+  top: 0;
+  left: 0;
   width: var(--nav-glider-width, 0px);
   height: var(--nav-glider-height, 36px);
   border-radius: 999px;
   background: var(--ink);
-  transform: translateX(var(--nav-glider-x, 0px));
-  transition: transform 360ms cubic-bezier(.18,.86,.2,1), width 360ms cubic-bezier(.18,.86,.2,1);
+  transform: translate3d(var(--nav-glider-x, 0px), var(--nav-glider-y, 4px), 0);
+  transition: none;
   pointer-events: none;
+}
+
+.site-nav.is-glider-ready .nav-glider {
+  transition:
+    transform 220ms cubic-bezier(.2,.82,.18,1),
+    width 220ms cubic-bezier(.2,.82,.18,1);
 }
 
 .bag-button,
@@ -281,17 +287,33 @@ main {
 
 .route-transition {
   position: fixed;
-  inset: 0;
+  inset: 0 auto 0 0;
   z-index: 200;
+  width: 118vw;
   display: grid;
   place-items: center;
   background:
-    radial-gradient(circle at 50% 46%, rgba(255, 225, 106, 0.18), transparent 28%),
-    linear-gradient(120deg, var(--ink) 0%, #101619 58%, rgba(21, 27, 30, 0.94) 100%);
-  clip-path: inset(0 100% 0 0 round 0);
+    radial-gradient(circle at 52% 48%, rgba(255, 225, 106, 0.2), transparent 26%),
+    linear-gradient(112deg, var(--ink) 0%, #101619 60%, rgba(21, 27, 30, 0.72) 100%);
+  clip-path: none;
   opacity: 0;
   pointer-events: none;
-  transition: clip-path 430ms cubic-bezier(.18,.86,.2,1), opacity 300ms ease;
+  transform: translate3d(-112%, 0, 0) skewX(-7deg);
+  transform-origin: left center;
+  transition: transform 300ms cubic-bezier(.28,.86,.22,1), opacity 180ms ease;
+  will-change: transform, opacity;
+}
+
+.route-transition::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -10vw;
+  bottom: 0;
+  width: 22vw;
+  background: linear-gradient(90deg, rgba(21, 27, 30, 0.62), rgba(251, 247, 237, 0));
+  filter: blur(10px);
+  pointer-events: none;
 }
 
 .route-transition::before {
@@ -300,27 +322,27 @@ main {
   font-size: clamp(28px, 5vw, 72px);
   font-weight: 950;
   letter-spacing: 0.08em;
-  transform: translateY(14px);
+  transform: skewX(7deg) translateY(8px);
   opacity: 0;
-  transition: transform 300ms ease, opacity 300ms ease;
+  transition: transform 220ms ease, opacity 180ms ease;
 }
 
 .route-transition.is-active {
-  clip-path: inset(0 0 0 0 round 0);
+  transform: translate3d(0, 0, 0) skewX(-7deg);
   opacity: 1;
 }
 
 .route-transition.is-active::before {
   opacity: 1;
-  transform: translateY(0);
+  transform: skewX(7deg) translateY(0);
 }
 
 body.is-route-leaving main,
 body.is-route-leaving footer {
-  opacity: 0.18;
-  filter: blur(5px);
-  transform: translateY(8px);
-  transition: opacity 260ms ease, filter 260ms ease, transform 260ms ease;
+  opacity: 0.76;
+  filter: blur(1.5px);
+  transform: translateY(2px);
+  transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease;
 }
 
 .button.ghost {
@@ -1225,7 +1247,9 @@ body[data-page="home"] .product-river > * {
   padding: 20px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--paper-strong);
+  background:
+    radial-gradient(circle at 90% 14%, rgba(255, 225, 106, 0.18), transparent 36%),
+    var(--paper-strong);
   color: var(--ink);
   font: inherit;
   text-align: left;
@@ -1251,21 +1275,28 @@ body[data-page="home"] .product-river > * {
 
 .mode-scroller:has(.mode-tile:hover) .mode-tile:not(:hover),
 .mode-scroller:has(.mode-tile.is-featured) .mode-tile:not(.is-featured) {
-  opacity: 0.56;
+  opacity: 0.58;
 }
 
 .mode-tile:hover,
 .mode-tile.is-featured {
-  transform: translateY(-6px) rotate(-0.6deg);
+  transform: translateY(-5px);
   box-shadow: var(--shadow);
   border-color: var(--ink);
-  background: var(--lemon);
+  background:
+    radial-gradient(circle at 82% 12%, rgba(255, 225, 106, 0.52), transparent 40%),
+    var(--paper-strong);
 }
 
 .mode-tile:hover::after,
 .mode-tile.is-featured::after {
-  opacity: 1;
+  opacity: 0.86;
   transform: scale(1);
+}
+
+.mode-tile:active,
+.scale-tile:active {
+  transform: translateY(-2px) scale(0.985);
 }
 
 .mode-tile:hover .mode-index,
@@ -1325,6 +1356,12 @@ body[data-page="home"] .product-river > * {
   text-align: left;
   cursor: pointer;
   transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease, border-color 220ms ease, opacity 220ms ease;
+}
+
+.mode-tile:focus-visible,
+.scale-tile:focus-visible {
+  outline: 2px solid var(--lemon);
+  outline-offset: 3px;
 }
 
 .scale-tile span {
