@@ -305,10 +305,11 @@ const getProduct = (id) => findProduct(id) || products[0];
 document.addEventListener("DOMContentLoaded", () => {
   initReveal();
   initNavigation();
+  initRouteTransitions();
   initCart();
   initProductGrids();
   initFilters();
-  initBenefitHover();
+  initHomeFinder();
   initHeroStage();
   initPromiseLab();
   initShopDetail();
@@ -337,9 +338,89 @@ function initNavigation() {
   const nav = qs("[data-nav]");
   if (!toggle || !nav) return;
 
+  const glider = document.createElement("span");
+  glider.className = "nav-glider";
+  glider.setAttribute("aria-hidden", "true");
+  nav.prepend(glider);
+  moveNavGlider(qs("[aria-current='page']", nav) || qs("a", nav));
+  window.addEventListener("resize", () => {
+    moveNavGlider(qs(".is-transition-target", nav) || qs("[aria-current='page']", nav) || qs("a", nav));
+  });
+
   toggle.addEventListener("click", () => {
     const open = nav.classList.toggle("is-open");
     toggle.setAttribute("aria-label", open ? "关闭导航" : "打开导航");
+    window.setTimeout(() => moveNavGlider(qs("[aria-current='page']", nav) || qs("a", nav)), 170);
+  });
+}
+
+function moveNavGlider(link) {
+  const nav = qs("[data-nav]");
+  if (!nav || !link) return;
+  const glider = qs(".nav-glider", nav);
+  if (!glider) return;
+
+  const navRect = nav.getBoundingClientRect();
+  const linkRect = link.getBoundingClientRect();
+  nav.style.setProperty("--nav-glider-x", `${linkRect.left - navRect.left}px`);
+  nav.style.setProperty("--nav-glider-width", `${linkRect.width}px`);
+  nav.style.setProperty("--nav-glider-height", `${linkRect.height}px`);
+}
+
+function initRouteTransitions() {
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const overlay = document.createElement("div");
+  overlay.className = "route-transition";
+  overlay.setAttribute("aria-hidden", "true");
+  document.body.append(overlay);
+
+  if (sessionStorage.getItem("pupkit-route-transition") === "1" && !reducedMotion.matches) {
+    sessionStorage.removeItem("pupkit-route-transition");
+    overlay.classList.add("is-active");
+    window.requestAnimationFrame(() => overlay.classList.remove("is-active"));
+  }
+
+  document.addEventListener("click", (event) => {
+    if (event.defaultPrevented || reducedMotion.matches) return;
+    const link = event.target.closest("a[href]");
+    if (!link || !isInternalPageLink(link)) return;
+
+    const targetUrl = new URL(link.getAttribute("href"), window.location.href);
+    event.preventDefault();
+    qsa(".site-nav a").forEach((item) => item.classList.remove("is-transition-target"));
+    const targetNavLink = getNavLinkForUrl(targetUrl);
+    if (targetNavLink) {
+      targetNavLink.classList.add("is-transition-target");
+      moveNavGlider(targetNavLink);
+    }
+    overlay.classList.add("is-active");
+    document.body.classList.add("is-route-leaving");
+    sessionStorage.setItem("pupkit-route-transition", "1");
+    window.setTimeout(() => {
+      window.location.href = targetUrl.href;
+    }, 430);
+  });
+}
+
+function isInternalPageLink(link) {
+  if (link.target || link.hasAttribute("download") || link.getAttribute("aria-disabled") === "true") return false;
+  const href = link.getAttribute("href");
+  if (!href || href.startsWith("#")) return false;
+
+  const targetUrl = new URL(href, window.location.href);
+  if (targetUrl.origin !== window.location.origin) return false;
+  const file = targetUrl.pathname.split("/").pop() || "index.html";
+  if (!["index.html", "shop.html", "playbook.html"].includes(file)) return false;
+  if (targetUrl.pathname === window.location.pathname && targetUrl.search === window.location.search) return false;
+  return true;
+}
+
+function getNavLinkForUrl(url) {
+  const file = url.pathname.split("/").pop() || "index.html";
+  return qsa(".site-nav a").find((link) => {
+    const linkUrl = new URL(link.getAttribute("href"), window.location.href);
+    const linkFile = linkUrl.pathname.split("/").pop() || "index.html";
+    return linkFile === file;
   });
 }
 
@@ -538,12 +619,20 @@ function initProductGrids() {
   });
 
   const params = new URLSearchParams(window.location.search);
+  const initialFilters = new Set();
+  const play = params.get("play");
+  const weight = params.get("weight");
   const filter = params.get("filter");
-  if (filter) {
-    state.filters = new Set([filter]);
-    qsa("[data-filter]").forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.filter === filter);
-    });
+
+  if (filterScopes.play.includes(play)) initialFilters.add(play);
+  if (filterScopes.weight.includes(weight)) initialFilters.add(weight);
+  if (!initialFilters.size && filter && filterScopes.play.includes(filter)) {
+    initialFilters.add(filter);
+  }
+
+  if (initialFilters.size) {
+    state.filters = initialFilters;
+    syncFilterButtons();
   }
 
   updateProductVisibility();
@@ -712,44 +801,67 @@ function productMatchesFilters(product, groups) {
   return true;
 }
 
-// 首页互动
-function initBenefitHover() {
+// 首页入口
+function initHomeFinder() {
+  const finder = qs("[data-home-finder]");
+  if (!finder) return;
+
   const preview = qs("[data-benefit-preview]");
-  const cards = qsa("[data-benefit-card]");
-  if (!preview || !cards.length) return;
+  const playOptions = qsa("[data-home-play]", finder);
+  const weightOptions = qsa("[data-home-weight]", finder);
+  const entry = qs("[data-home-shop-entry]", finder);
+  if (!preview || !playOptions.length || !weightOptions.length || !entry) return;
 
   const title = qs("strong", preview);
   const copy = qs("p", preview);
-  const activate = (card) => {
-    cards.forEach((item) => item.classList.toggle("is-featured", item === card));
-    if (title) title.textContent = card.dataset.benefitTitle;
-    if (copy) copy.textContent = card.dataset.benefitCopy;
+  const selection = { play: "", weight: "" };
+
+  const updateEntry = () => {
+    const playButton = playOptions.find((button) => button.dataset.homePlay === selection.play);
+    const weightButton = weightOptions.find((button) => button.dataset.homeWeight === selection.weight);
+    const ready = Boolean(playButton && weightButton);
+
+    if (ready) {
+      const params = new URLSearchParams({ play: selection.play, weight: selection.weight });
+      entry.href = `shop.html?${params.toString()}`;
+      entry.classList.remove("is-disabled");
+      entry.setAttribute("aria-disabled", "false");
+      if (title) title.textContent = `${playButton.dataset.benefitTitle} / ${weightButton.dataset.weightTitle}`;
+      if (copy) copy.textContent = weightButton.dataset.weightCopy;
+      return;
+    }
+
+    entry.href = "shop.html";
+    entry.classList.add("is-disabled");
+    entry.setAttribute("aria-disabled", "true");
+    if (title) title.textContent = "等待两项";
+    if (copy) copy.textContent = selection.play ? "再选小狗尺度，货架才会收窄。" : "玩法和尺度对上，货架才有意义。";
   };
 
-  cards.forEach((card) => {
-    card.addEventListener("pointerenter", () => activate(card));
-    card.addEventListener("focus", () => activate(card));
-    card.addEventListener("click", (event) => {
-      if (!card.dataset.homeFilter) return;
-      event.preventDefault();
-      activate(card);
-      filterHomeProducts(card.dataset.homeFilter);
+  playOptions.forEach((button) => {
+    button.addEventListener("click", () => {
+      selection.play = button.dataset.homePlay;
+      playOptions.forEach((item) => item.classList.toggle("is-featured", item === button));
+      updateEntry();
     });
   });
-}
 
-function filterHomeProducts(filter) {
-  const grid = qs("[data-page='home'] [data-product-grid]");
-  if (!grid) return;
-  const filtered = products.filter((product) => product.play === filter);
-  transitionProductGrid(grid, filtered);
-}
+  weightOptions.forEach((button) => {
+    button.addEventListener("click", () => {
+      selection.weight = button.dataset.homeWeight;
+      weightOptions.forEach((item) => item.classList.toggle("is-active", item === button));
+      updateEntry();
+    });
+  });
 
-function transitionProductGrid(grid, source) {
-  animateGridChange(grid, () => {
-    renderProductGrid(grid, source);
-    initCardPointer();
-  }, 180, 580);
+  entry.addEventListener("click", (event) => {
+    if (entry.getAttribute("aria-disabled") === "true") {
+      event.preventDefault();
+      showToast("先选玩法和尺度");
+    }
+  });
+
+  updateEntry();
 }
 
 function initHeroStage() {

@@ -159,64 +159,99 @@
       <section class="product-river reveal" id="home-products">
         <div class="section-heading">
           <p class="eyebrow">按玩法逛</p>
-          <h2>场景比花色更重要</h2>
+          <h2>先选玩法，再选尺度</h2>
         </div>
-        <div class="mode-scroller" aria-label="玩具场景分类" data-benefit-list>
-          <a
-            class="mode-tile is-featured"
-            href="#home-products"
-            data-home-filter="chew"
-            data-benefit-card
-            data-benefit-title="耐咬"
-            data-benefit-copy="咀嚼有出口，情绪有落点。"
-          >
-            <span class="mode-index">A</span>
-            <strong>耐咬</strong>
-            <small>力量落进咬感里</small>
-          </a>
-          <a
-            class="mode-tile"
-            href="#home-products"
-            data-home-filter="puzzle"
-            data-benefit-card
-            data-benefit-title="益智藏食"
-            data-benefit-copy="零食变慢，鼻子变忙。"
-          >
-            <span class="mode-index">B</span>
-            <strong>益智藏食</strong>
-            <small>食物变成任务</small>
-          </a>
-          <a
-            class="mode-tile"
-            href="#home-products"
-            data-home-filter="fetch"
-            data-benefit-card
-            data-benefit-title="抛接追逐"
-            data-benefit-copy="速度有目标，回来有理由。"
-          >
-            <span class="mode-index">C</span>
-            <strong>抛接追逐</strong>
-            <small>追逐带着方向</small>
-          </a>
-          <a
-            class="mode-tile"
-            href="#home-products"
-            data-home-filter="quiet"
-            data-benefit-card
-            data-benefit-title="低噪陪伴"
-            data-benefit-copy="声音被放轻，陪伴被留下。"
-          >
-            <span class="mode-index">D</span>
-            <strong>低噪陪伴</strong>
-            <small>安静也是玩耍</small>
-          </a>
+        <div class="home-finder" data-home-finder>
+          <div class="finder-choice">
+            <span class="eyebrow">玩法气质</span>
+            <div class="mode-scroller" aria-label="玩具场景分类">
+              <button
+                class="mode-tile"
+                type="button"
+                data-home-play="chew"
+                data-benefit-title="耐咬"
+                data-benefit-copy="咀嚼有出口，情绪有落点。"
+              >
+                <span class="mode-index">A</span>
+                <strong>耐咬</strong>
+                <small>力量落进咬感里</small>
+              </button>
+              <button
+                class="mode-tile"
+                type="button"
+                data-home-play="puzzle"
+                data-benefit-title="益智藏食"
+                data-benefit-copy="零食变慢，鼻子变忙。"
+              >
+                <span class="mode-index">B</span>
+                <strong>益智藏食</strong>
+                <small>食物变成任务</small>
+              </button>
+              <button
+                class="mode-tile"
+                type="button"
+                data-home-play="fetch"
+                data-benefit-title="抛接追逐"
+                data-benefit-copy="速度有目标，回来有理由。"
+              >
+                <span class="mode-index">C</span>
+                <strong>抛接追逐</strong>
+                <small>追逐带着方向</small>
+              </button>
+              <button
+                class="mode-tile"
+                type="button"
+                data-home-play="quiet"
+                data-benefit-title="低噪陪伴"
+                data-benefit-copy="声音被放轻，陪伴被留下。"
+              >
+                <span class="mode-index">D</span>
+                <strong>低噪陪伴</strong>
+                <small>安静也是玩耍</small>
+              </button>
+            </div>
+          </div>
+          <div class="finder-choice finder-choice-scale">
+            <span class="eyebrow">小狗尺度</span>
+            <div class="scale-chooser" aria-label="小狗身体尺寸">
+              <button
+                class="scale-tile"
+                type="button"
+                data-home-weight="under5"
+                data-weight-title="5kg 以下"
+                data-weight-copy="轻量入口，小嘴也能叼稳。"
+              >
+                <span>01</span>
+                <strong>5kg 以下</strong>
+                <small>更轻、更小、更好入口</small>
+              </button>
+              <button
+                class="scale-tile"
+                type="button"
+                data-home-weight="five12"
+                data-weight-title="5-12kg"
+                data-weight-copy="咬感更稳，互动更有回弹。"
+              >
+                <span>02</span>
+                <strong>5-12kg</strong>
+                <small>更稳、更韧、更适合拉扯</small>
+              </button>
+            </div>
+          </div>
+          <div class="benefit-preview home-entry-panel" data-benefit-preview data-home-selection-summary>
+            <span>当前选择</span>
+            <strong>等待两项</strong>
+            <p>玩法和尺度对上，货架才有意义。</p>
+            <a
+              class="button primary home-shop-entry is-disabled"
+              href="shop.html"
+              aria-disabled="true"
+              data-home-shop-entry
+            >
+              进入匹配货架
+            </a>
+          </div>
         </div>
-        <div class="benefit-preview" data-benefit-preview>
-          <span>当前聚焦</span>
-          <strong>耐咬</strong>
-          <p>咀嚼有出口，情绪有落点。</p>
-        </div>
-        <div class="product-grid compact-grid" data-product-grid data-limit="8"></div>
       </section>
 
       <section class="lab-band">
@@ -258,6 +293,7 @@
         <p>作品集概念站。品牌与商品均为虚构。</p>
       </div>
       <nav>
+        <a href="index.html">首页</a>
         <a href="shop.html">商店</a>
         <a href="playbook.html">玩法指南</a>
       </nav>
