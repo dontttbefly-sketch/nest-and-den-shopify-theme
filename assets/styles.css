@@ -1324,6 +1324,7 @@ body[data-page="home"] .product-river > * {
   opacity: 1;
 }
 
+body[data-page="home"] .product-card::before,
 body[data-page="shop"] .product-card::before {
   background:
     radial-gradient(
@@ -1336,6 +1337,7 @@ body[data-page="shop"] .product-card::before {
   transition: opacity 260ms ease;
 }
 
+body[data-page="home"] .product-card:hover::before,
 body[data-page="shop"] .product-card:hover::before {
   opacity: 0.74;
 }
